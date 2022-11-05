@@ -1,2 +1,2 @@
 # frontEndDaily
-记录前端生活
+> 记录前端生活
