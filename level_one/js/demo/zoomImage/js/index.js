@@ -4,36 +4,6 @@
   };
 
   /**
-   * 函数防抖
-   * @param {Function} fn 需防抖函数
-   * @param {number} delay 延迟毫秒数
-   * @param {boolean} immediate 是否立即执行
-   * @returns 防抖后函数
-   */
-  var debounce = function (fn, delay, immediate) {
-    var timer = null;
-
-    return function () {
-      var context = this,
-        args = arguments;
-
-      timer && clearTimeout(timer);
-      if (immediate) {
-        var immediateExec = !timer;
-        immediateExec && fn.apply(context, args);
-        timer = setTimeout(function () {
-          timer = null;
-        }, delay);
-      } else {
-        timer = setTimeout(function () {
-          fn.apply(context, args);
-          timer = null;
-        }, delay);
-      }
-    };
-  };
-
-  /**
    * 放大镜
    * @param {Element} zoomDom 放大镜容器
    * @param {string} normalImageSrc 正常图片地址
@@ -120,42 +90,36 @@
         hideZoomImageAndBar();
       });
 
-      normalImageDom.addEventListener(
-        'mousemove',
-        debounce(function (e) {
-          // zoomBar跟随鼠标移动
-          var zoomBarTranslateX = e.clientX - zoomDomLeft - zoomBarWidth / 2;
-          var zoomBarTranslateY = e.clientY - zoomDomTop - zoomBarHeight / 2;
+      normalImageDom.addEventListener('mousemove', function (e) {
+        // zoomBar跟随鼠标移动
+        var zoomBarTranslateX = e.clientX - zoomDomLeft - zoomBarWidth / 2;
+        var zoomBarTranslateY = e.clientY - zoomDomTop - zoomBarHeight / 2;
 
-          // zoomBar水平方向可移动距离
-          zoomBarTranslateX =
-            zoomBarTranslateX < -startLeft ? -startLeft : zoomBarTranslateX;
-          zoomBarTranslateX =
-            zoomBarTranslateX > zoomBarMaxMoveX
-              ? zoomBarMaxMoveX
-              : zoomBarTranslateX;
+        // zoomBar水平方向可移动距离
+        zoomBarTranslateX =
+          zoomBarTranslateX < -startLeft ? -startLeft : zoomBarTranslateX;
+        zoomBarTranslateX =
+          zoomBarTranslateX > zoomBarMaxMoveX
+            ? zoomBarMaxMoveX
+            : zoomBarTranslateX;
 
-          // zoomBar垂直方向可移动距离
-          zoomBarTranslateY =
-            zoomBarTranslateY < -startTop ? -startTop : zoomBarTranslateY;
-          zoomBarTranslateY =
-            zoomBarTranslateY > zoomBarMaxMoveY
-              ? zoomBarMaxMoveY
-              : zoomBarTranslateY;
+        // zoomBar垂直方向可移动距离
+        zoomBarTranslateY =
+          zoomBarTranslateY < -startTop ? -startTop : zoomBarTranslateY;
+        zoomBarTranslateY =
+          zoomBarTranslateY > zoomBarMaxMoveY
+            ? zoomBarMaxMoveY
+            : zoomBarTranslateY;
 
-          // zoomImage背景图片移动距离
-          var zoomImageBgImgTranslateX =
-            -(zoomBgImgCanMoveX / zoomBarCanMoveX) * zoomBarTranslateX;
-          var zoomImageBgImgTranslateY =
-            -(zoomBgImgCanMoveY / zoomBarCanMoveY) * zoomBarTranslateY;
+        // zoomImage背景图片移动距离
+        var zoomImageBgImgTranslateX =
+          -(zoomBgImgCanMoveX / zoomBarCanMoveX) * zoomBarTranslateX;
+        var zoomImageBgImgTranslateY =
+          -(zoomBgImgCanMoveY / zoomBarCanMoveY) * zoomBarTranslateY;
 
-          zoomBarMove(zoomBarTranslateX, zoomBarTranslateY);
-          zoomImageBgImgMove(
-            zoomImageBgImgTranslateX,
-            zoomImageBgImgTranslateY
-          );
-        }, 10)
-      );
+        zoomBarMove(zoomBarTranslateX, zoomBarTranslateY);
+        zoomImageBgImgMove(zoomImageBgImgTranslateX, zoomImageBgImgTranslateY);
+      });
     };
 
     var zoomImg = new Image();
