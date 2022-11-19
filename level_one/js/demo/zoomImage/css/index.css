@@ -1,0 +1,47 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+img {
+  vertical-align: top;
+  object-fit: cover;
+}
+
+.zoom-image-wrap {
+  position: relative;
+  width: 350px;
+  height: 350px;
+  margin: 20px;
+  outline: 1px solid #ccc;
+}
+
+.zoom-image-wrap > .normal-image,
+.zoom-image-wrap > .normal-image > img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.zoom-image-wrap > .zoom-image {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 500px;
+  height: 500px;
+  outline: 1px solid #ccc;
+  background: url(./../images/mouseBigSize.jpg) no-repeat;
+  visibility: hidden;
+}
+
+.normal-image > .zoom-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  background-color: rgba(255, 255, 0, 0.5);
+  cursor: move;
+  visibility: hidden;
+}
