@@ -38,8 +38,12 @@
     var top = 0;
 
     while (parent) {
-      left += dom.offsetLeft + parseFloat(getComputedStyle(parent).borderLeft);
-      top += dom.offsetTop + parseFloat(getComputedStyle(parent).borderTop);
+      left +=
+        dom.offsetLeft + parseFloat(getComputedStyle(parent).borderLeftWidth);
+      top +=
+        dom.offsetTop + parseFloat(getComputedStyle(parent).borderTopWidth);
+
+      dom = parent;
       parent = parent.offsetParent;
     }
 
@@ -59,6 +63,8 @@
     var pageTop = domPosInPage.top;
     var currentScrollTop =
       window.pageYOffset || document.documentElement.scrollTop;
+
+    console.log(domPosInPage);
     // 新增固定定位
     var addAbsorption = function (left) {
       dom.style.position = 'fixed';
