@@ -282,6 +282,7 @@
   var initWishWallBoardPaper = function () {
     paperMetaArr.forEach(function (paperMeta) {
       wishWallBoardDom.appendChild(createPaperDom(paperMeta));
+      mouseDragBox(paperMeta);
     });
   };
 
