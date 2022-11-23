@@ -85,8 +85,8 @@
 
     // 触发显示自定义菜单
     showContainerDom.addEventListener('contextmenu', function (e) {
-      e.bubbles && e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault();
+      e.bubbles && e.stopPropagation();
       moveMenuPos(e.clientX, e.clientY);
       showMenu();
     });
@@ -101,8 +101,8 @@
 
     // 自定义菜单禁用默认菜单显示
     menuDom.addEventListener('contextmenu', function (e) {
-      e.bubbles && e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault();
+      e.bubbles && e.stopPropagation();
     });
 
     if (showContainerDom !== window) {
