@@ -64,7 +64,17 @@
   var wishWallBoardDom = $('.wish-wall-board');
   var wishWallBoardClientWidth = wishWallBoardDom.clientWidth;
   var wishWallBoardClientHeight = wishWallBoardDom.clientHeight;
-  var paperMetaArr = [];
+  var paperMetaArr = [
+    {
+      width: 170,
+      height: 170,
+      left: 100,
+      top: 120,
+      bgColor: '#0f0f0f',
+      content: 'Hi，请添加你的愿望哦！',
+      zIndex: 0,
+    },
+  ];
 
   /**
    * 获取所有paper中最大zIndex值
@@ -79,6 +89,10 @@
     return maxZIndex === -Infinity ? -1 : maxZIndex;
   };
 
+  /**
+   * paper拖拽移动
+   * @param {object} paperMeta paper元信息
+   */
   var mouseDragBox = function (paperMeta) {
     var paperDom = paperMeta.dom;
     // 记录拖拽按下时鼠标位置
@@ -145,6 +159,40 @@
   };
 
   /**
+   * 根据paper元信息，创建一个paper元素
+   * @param {object} paperMeta paper元信息
+   * @returns paper元素
+   */
+  var createPaperDom = function (paperMeta) {
+    var paperWidth = paperMeta.width;
+    var paperHeight = paperMeta.height;
+    var left = paperMeta.left;
+    var top = paperMeta.top;
+    var bgColor = paperMeta.bgColor;
+    var zIndex = paperMeta.zIndex;
+    var content = paperMeta.content;
+
+    var paperDom = document.createElement('div');
+    paperDom.className = 'paper';
+
+    paperDom.style.left = left + 'px';
+    paperDom.style.top = top + 'px';
+    paperDom.style.width = paperWidth + 'px';
+    paperDom.style.height = paperHeight + 'px';
+    paperDom.style.backgroundColor = bgColor;
+    paperDom.style.zIndex = zIndex;
+
+    paperDom.innerHTML = `
+      <p class="paper-content">${content}</p>
+      <i class="close-btn" data-del-btn="true">x</i>
+    `;
+
+    paperMeta.dom = paperDom;
+
+    return paperDom;
+  };
+
+  /**
    * 创建一个paper
    * @param {string} content 愿望内容
    * @param {number} containerWidth 容器宽度
@@ -160,38 +208,18 @@
     paperWidth = 170,
     paperHeight = 170
   ) {
-    var paperDom = document.createElement('div');
-    paperDom.className = 'paper';
-
-    var paperWidth = 170;
-    var paperHeight = 170;
-    var left = randomInt(0, containerWidth - paperWidth);
-    var top = randomInt(0, containerHeight - paperHeight);
-    var bgColor = randomHexColor(undefined, 0xffffff - 1);
-    var zIndex = getMaxZIndex() + 1;
-
-    paperDom.style.left = left + 'px';
-    paperDom.style.top = top + 'px';
-    paperDom.style.width = paperWidth + 'px';
-    paperDom.style.height = paperHeight + 'px';
-    paperDom.style.backgroundColor = bgColor;
-    paperDom.style.zIndex = zIndex;
-
-    paperDom.innerHTML = `
-      <p class="paper-content">${content}</p>
-      <i class="close-btn" data-del-btn="true">x</i>
-    `;
-
     var paperMeta = {
-      dom: paperDom,
       width: paperWidth,
       height: paperHeight,
-      left,
-      top,
-      bgColor,
+      left: randomInt(0, containerWidth - paperWidth),
+      top: randomInt(0, containerHeight - paperHeight),
+      bgColor: randomHexColor(undefined, 0xffffff - 1),
       content,
-      zIndex,
+      zIndex: getMaxZIndex() + 1,
     };
+
+    var paperDom = createPaperDom(paperMeta);
+
     paperMetaArr.push(paperMeta);
     mouseDragBox(paperMeta);
 
@@ -199,7 +227,7 @@
   };
 
   /**
-   * 删除一个paper
+   * 删除一个paper元素
    * @param {Element} paperDom dom元素
    */
   var removePaper = function (paperDom) {
@@ -214,7 +242,7 @@
   };
 
   /**
-   * 更新paper对象位置
+   * 更新paper元素位置
    * @param {object} paperMeta paper元信息对象
    */
   var paperPosChange = function (paperMeta) {
@@ -224,6 +252,11 @@
     paperDom.style.top = paperMeta.top + 'px';
   };
 
+  /**
+   * 更新所有paper元信息和paper元素位置
+   * @param {number} hChangeRate 前后宽度变化比率
+   * @param {number} vChangeRate 前后高度变化比率
+   */
   var updateAllPaperMetaAndPos = function (hChangeRate, vChangeRate) {
     paperMetaArr.forEach(function (paperMeta) {
       // 水平、垂直方向最大偏移量
@@ -242,6 +275,13 @@
       paperMeta.top = top;
 
       paperPosChange(paperMeta);
+    });
+  };
+
+  // 初始化所有的paper
+  var initWishWallBoardPaper = function () {
+    paperMetaArr.forEach(function (paperMeta) {
+      wishWallBoardDom.appendChild(createPaperDom(paperMeta));
     });
   };
 
@@ -296,6 +336,7 @@
 
   // 初始化
   var init = function () {
+    initWishWallBoardPaper();
     registerEvents();
   };
   init();
