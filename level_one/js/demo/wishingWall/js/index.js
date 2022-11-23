@@ -173,7 +173,7 @@
     paperDom.style.left = left + 'px';
     paperDom.style.top = top + 'px';
     paperDom.style.width = paperWidth + 'px';
-    paperDom.style.Height = paperHeight + 'px';
+    paperDom.style.height = paperHeight + 'px';
     paperDom.style.backgroundColor = bgColor;
     paperDom.style.zIndex = zIndex;
 
