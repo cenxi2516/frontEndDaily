@@ -4,7 +4,7 @@
  * @param {string} dateFormatStr 日期时间格式
  * @returns 日期时间
  */
-function format(date, dateFormatStr) {
+function format(date, dateFormatStr = 'YYYY-MM-DD HH:mm:ss') {
   var weeks = [
     '星期日',
     '星期一',
@@ -26,6 +26,6 @@ function format(date, dateFormatStr) {
   };
 
   return dateFormatStr.replace(/(?:YYYY|MM|DD|dd|HH|mm|ss|SSS)/g, function ($) {
-    return dateTime[$];
+    return String(dateTime[$]).padStart($.length, '0');
   });
 }
