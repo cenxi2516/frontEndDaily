@@ -9,6 +9,7 @@
     hitTimes: 0,
     timer: null,
     startCountDown: false,
+    isReset: false,
     showCountdownTimeDom: $('.countdown-time'),
     showHitsTimesDom: $('.hits-times'),
   };
@@ -39,6 +40,7 @@
   var startCountDownTime = function () {
     if (config.startCountDown) return;
 
+    config.isReset = false;
     config.startCountDown = true;
     var countdownTime = config.countdownTime;
     var showCountdownTimeDom = config.showCountdownTimeDom;
@@ -60,23 +62,29 @@
     setHitTimes(config.showHitsTimesDom, config.hitTimes);
   };
 
-  // 重置
+  // 重置APM
   var resetAPMCalculator = function () {
     // 清除定时器
     // 重置倒计时、点击次数
     // 重置开启了倒计时
+    if (config.isReset) return;
+
+    config.isReset = true;
     initAPMCalculator();
+  };
+
+  // 开始APM
+  var startAPMCalculator = function () {
+    // 开启倒计时
+    startCountDownTime();
+    // 记录点击次数
+    recordHitTimes();
   };
 
   // 注册事件
   var registerEvents = function () {
     // 点击
-    $('.func-btn>.click').addEventListener('click', function () {
-      // 开启倒计时
-      startCountDownTime();
-      // 记录点击次数
-      recordHitTimes();
-    });
+    $('.func-btn>.click').addEventListener('click', startAPMCalculator);
     // 重置
     $('.func-btn>.reset').addEventListener('click', resetAPMCalculator);
   };
