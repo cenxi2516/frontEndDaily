@@ -1,0 +1,17 @@
+.apm-calculator-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 300px;
+  text-align: center;
+}
+
+.apm-calculator-wrap > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+}
+
+.func-btn > button {
+  margin: 0 10px;
+}
