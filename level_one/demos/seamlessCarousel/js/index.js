@@ -44,7 +44,7 @@
     var carouselImages = config.carouselImages;
     var carouselWidth = config.carouselWidth || 520;
     var carouselHeight = config.carouselHeight || 280;
-    var duration = config.duration || 2000;
+    var duration = config.duration || 5000;
     var finishAnimationTime = config.finishAnimationTime || 500;
     var curIndex = config.curIndex || 0;
 
@@ -137,7 +137,7 @@
     var carouselAnimation = function (startValue, targetValue, callback) {
       if (finishAnimationTimer) return;
 
-      var duration = 20;
+      var duration = 16; // 16ms，接近浏览器重绘时间
       var finishAnimationTimeTimes =
         Math.abs(targetValue - startValue) / carouselWidth;
       var times = Math.ceil(
@@ -290,7 +290,7 @@
       autoCarousel();
     };
     init();
-  };
+  };;;
 
   // 初始化
   var init = function () {
