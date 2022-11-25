@@ -118,6 +118,7 @@
       []);
 
       carouselListDom.innerHTML = carouselImageHTMLArr.join('');
+      carouselListMove(-curIndex * carouselWidth);
     };
 
     // 显示左右点击按钮
