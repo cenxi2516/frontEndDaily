@@ -46,6 +46,7 @@
     var carouselHeight = config.carouselHeight || 280;
     var duration = config.duration || 2000;
     var finishAnimationTime = config.finishAnimationTime || 500;
+    var curIndex = config.curIndex || 0;
 
     // 获取dom元素
     var carouselListDom = carouselContainerDom.children[0];
@@ -57,7 +58,6 @@
     // 轮播数据
     var newCarouselImages = Array.from(carouselImages);
     var carouselImageNum = carouselImages.length;
-    var curIndex = 0;
     var curActiveDotDom = null;
     var durationTimer = null;
     var finishAnimationTimer = null;
