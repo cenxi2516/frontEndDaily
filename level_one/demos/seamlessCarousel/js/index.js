@@ -39,6 +39,28 @@
     };
   };
 
+  /**
+   * 检测元素是否在视口内
+   * @param {Element} element dom元素
+   * @param {number} vwWidth 视口宽度
+   * @param {number} vwHeight 视口高度
+   * @returns 元素是否在视口范围内
+   */
+  function judgeElementInVW(element, vwWidth, vwHeight) {
+    var clientRect = element.getBoundingClientRect();
+    var top = clientRect.top;
+    var right = clientRect.right;
+    var bottom = clientRect.bottom;
+    var left = clientRect.left;
+
+    var topIsInVW = top >= 0 && top < vwHeight;
+    var rightIsVW = right > 0 && right <= vwWidth;
+    var bottomIsVW = bottom > 0 && bottom <= vwHeight;
+    var leftIsVw = left >= 0 && left < vwWidth;
+
+    return topIsInVW && rightIsVW && bottomIsVW && leftIsVw;
+  }
+
   var seamlessCarousel = function (config) {
     var carouselContainerDom = config.carouselContainerDom;
     var carouselImages = config.carouselImages;
@@ -61,6 +83,16 @@
     var curActiveDotDom = null;
     var durationTimer = null;
     var finishAnimationTimer = null;
+    var vwWidth = 0;
+    var vwHeight = 0;
+
+    // 初始化视口尺寸
+    var initVWSize = function () {
+      vwWidth =
+        document.documentElement.clientWidth || document.body.clientWidth;
+      vwHeight =
+        document.documentElement.clientHeight || document.body.clientHeight;
+    };
 
     // 初始化轮播容器
     var initCarouselContainer = function () {
@@ -279,10 +311,22 @@
           ? clearAutoCarousel()
           : autoCarousel();
       });
+      // 监听轮播容器是否在视口范围内: 在视口内自动播放轮播图，否则暂停播放轮播图
+      window.addEventListener(
+        'scroll',
+        debounce(function () {
+          judgeElementInVW(carouselContainerDom, vwWidth, vwHeight)
+            ? autoCarousel()
+            : clearAutoCarousel();
+        })
+      );
+      // 监听窗口尺寸
+      window.addEventListener('resize', debounce(initVWSize));
     };
 
     // 初始化
     var init = function () {
+      initVWSize();
       initCarouselContainer();
       generateDots();
       generateCarouselImages();
@@ -290,7 +334,7 @@
       autoCarousel();
     };
     init();
-  };;;
+  };
 
   // 初始化
   var init = function () {
