@@ -50,8 +50,48 @@
       var startClientX = boxClientData.left;
       var startClientY = boxClientData.top;
       // 记录鼠标移动位置
-      var translateX = 0;
-      var translateY = 0;
+      var _top = 0;
+      var _left = 0;
+      var _translateX = 0;
+      var _translateY = 0;
+      var config = {
+        set top(val) {
+          _top = val;
+          boxDom.style.top = `${val}px`;
+        },
+        get top() {
+          return _top;
+        },
+        set left(val) {
+          _left = val;
+          boxDom.style.left = `${val}px`;
+        },
+        get left() {
+          return _left;
+        },
+        set translateX(val) {
+          // 水平方向允许移动的范围
+          val = val < -startClientX ? -startClientX : val;
+          val = val > hMaxTranslate ? hMaxTranslate : val;
+
+          boxDom.style.transform = `translate(${val}px, ${this.translateY}px)`;
+          _translateX = val;
+        },
+        get translateX() {
+          return _translateX;
+        },
+        set translateY(val) {
+          // 垂直方向允许移动的范围
+          val = val < -startClientY ? -startClientY : val;
+          val = val > vMaxTranslate ? vMaxTranslate : val;
+
+          boxDom.style.transform = `translate(${this.translateX}px, ${val}px)`;
+          _translateY = val;
+        },
+        get translateY() {
+          return _translateY;
+        },
+      };
       // 浏览器可视区域的尺寸
       var browserClientWidth =
         document.documentElement.clientWidth || document.body.clientWidth;
@@ -65,27 +105,17 @@
 
       // 设置盒子移动距离
       var setBoxMove = debounce(function (e) {
-        translateX = e.clientX - startX;
-        translateY = e.clientY - startY;
-
-        // 水平方向允许移动的范围
-        translateX = translateX < -startClientX ? -startClientX : translateX;
-        translateX = translateX > hMaxTranslate ? hMaxTranslate : translateX;
-        // 垂直方向允许移动的范围
-        translateY = translateY < -startClientY ? -startClientY : translateY;
-        translateY = translateY > vMaxTranslate ? vMaxTranslate : translateY;
-
-        boxDom.style.transform = `translate(${translateX}px, ${translateY}px)`;
+        config.translateX = e.clientX - startX;
+        config.translateY = e.clientY - startY;
       }, 5);
 
       // 设置盒子移动结束后位置
       var setBoxEndPos = function () {
-        var endX = startClientX + translateX;
-        var endY = startClientY + translateY;
+        config.left = startClientX + config.translateX;
+        config.top = startClientY + config.translateY;
 
-        boxDom.style.left = `${endX}px`;
-        boxDom.style.top = `${endY}px`;
-        boxDom.style.transform = `translate(0, 0)`;
+        config.translateX = 0;
+        config.translateY = 0;
       };
 
       // 禁止窗口默认菜单项出现
