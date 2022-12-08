@@ -8,15 +8,18 @@ function clone(data, deep = false) {
   if (data && typeof data === 'object') {
     // 对象：普通对象、数组
     var newObj = Array.isArray(data) ? [] : {};
+
     for (var key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
         var value = data[key];
+
         newObj[key] = deep ? clone(value, deep) : value;
       }
     }
+
     return newObj;
-  } else {
-    // null、undefined、string、number、boolean、function
-    return data;
   }
+
+  // null、undefined、string、number、boolean、function
+  return data;
 }
