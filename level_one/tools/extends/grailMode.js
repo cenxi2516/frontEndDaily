@@ -10,9 +10,16 @@ var inherit = (function() {
     return function(Child, Parent) {
         F.prototype = Parent.prototype;
         Child.prototype = new F();
+
         Child.prototype.constructor = Child;
         Child.prototype.uber = Parent.prototype;
         Child.prototype.super = Parent;
+
+        Object.defineProperties(Child.prototype, {
+          constructor: {
+            enumerable: false,
+          },
+        });
     };
 }());
 
