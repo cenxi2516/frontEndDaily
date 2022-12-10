@@ -39,12 +39,14 @@ const JSONParse = (() => {
     return (data, fn) => {
       if (isObjectType(data)) {
         for (const key in data) {
-          const value = data[key];
-          if (isObjectType(value)) {
-            depthFirstSearch(value, fn);
-            handler(data, key, value, fn);
-          } else {
-            handler(data, key, value, fn);
+          if (Object.prototype.hasOwnProperty.call(data, key)) {
+            const value = data[key];
+            if (isObjectType(value)) {
+              depthFirstSearch(value, fn);
+              handler(data, key, value, fn);
+            } else {
+              handler(data, key, value, fn);
+            }
           }
         }
 
