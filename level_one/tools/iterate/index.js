@@ -5,16 +5,22 @@ const isIteratorCreateFunction = (() => {
   const hasOwnProperty = (obj, key) =>
     Object.prototype.hasOwnProperty.call(obj, key);
 
-  return (func) => {
+  /**
+   * 检测是否是某个对象的迭代器创建函数
+   * @param  {Object} thisArg 某个对象
+   * @param  {Function} func  某个函数
+   * @return {boolean}        true表示是，false表示否
+   */
+  return (thisArg, func) => {
     if (typeof func !== 'function') return false;
 
-    const iteratorCreateFunc = func;
+    const iteratorCreateFunc = func.bind(thisArg);
     if (getDataType(iteratorCreateFunc) !== 'Function') return false;
     const iterator = iteratorCreateFunc();
     if (typeof iterator !== 'object') return false;
     const iteratorNextFunc = iterator.next;
     if (getDataType(iteratorNextFunc) !== 'Function') return false;
-    const firstIterateResult = iteratorNextFunc();
+    const firstIterateResult = iteratorNextFunc.call(iterator);
     if (
       typeof firstIterateResult !== 'object' ||
       !hasOwnProperty(firstIterateResult, 'done') ||
@@ -40,12 +46,16 @@ const isIterable = (() => {
   const getDataType = (data) =>
     Object.prototype.toString.call(data).slice(8, -1);
 
+  /**
+   * [description]
+   * @param  {any} data 要检测数据
+   * @return {boolean}  true表示是，false表示否
+   */
   return (data) => {
     if (data && typeof data === 'object') {
       if (DefaultIterableObjectStr.includes(getDataType(data))) return true;
 
-      const newData = { ...data };
-      return isIteratorCreateFunction(newData[Symbol.iterator]);
+      return isIteratorCreateFunction(data, data[Symbol.iterator]);
     }
 
     // 函数、原始值
