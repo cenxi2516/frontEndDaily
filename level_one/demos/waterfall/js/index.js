@@ -13,6 +13,7 @@
   const waterfallInfo = {
     containerWidth: 0,
     containerHeight: 0,
+    isInit: true, // 是否初始化中
     hGap: 0, // 水平间隙
     vGap: 0, // 垂直间隙
     columnCount: 0, // 每行列数
@@ -96,14 +97,28 @@
       callback?.();
     };
   })();
+  // 改变瀑布流布局
+  const changeWaterfallLayout = (callback) => {
+    initWaterfallInfo();
+    waterfallInfo.allImageData.forEach((imgInfo) => {
+      setImagePosition(imgInfo, setContainerHeight);
+      callback?.(imgInfo);
+    });
+  };
   // 设置容器高度
   const setContainerHeight = debounce(() => {
-    const { columnHeights, vGap } = waterfallInfo;
-    const { container } = finallyConfig;
+    const { columnHeights, vGap, isInit, allImageData } = waterfallInfo;
+    const { container, data } = finallyConfig;
 
     const maxHeight = Math.max.apply(Math, columnHeights) - vGap;
     waterfallInfo.containerHeight = maxHeight;
     container.style.height = maxHeight + 'px';
+
+    if (data.length === allImageData.length && isInit) {
+      // 当所有图片加载完，将所有图片添加到容器中，解决出现滚动条后：容器宽度前后不一致(当容器宽度为百分比时)
+      waterfallInfo.isInit = false;
+      changeWaterfallLayout(({ imgDom }) => container.appendChild(imgDom));
+    }
   });
   // 初始化所有图片
   const initAllImageItem = (() => {
@@ -126,7 +141,6 @@
         this.height = imageHeight;
         this.style.position = 'absolute';
         this.style.transition = '0.5s';
-        container.appendChild(this);
 
         waterfallInfo.allImageData.push(imgInfo);
 
@@ -151,12 +165,7 @@
   const registerEvents = () => {
     window.addEventListener(
       'resize',
-      debounce(() => {
-        initWaterfallInfo();
-        waterfallInfo.allImageData.forEach((imgInfo) =>
-          setImagePosition(imgInfo, setContainerHeight)
-        );
-      })
+      debounce(changeWaterfallLayout.bind(null, null))
     );
   };
 
