@@ -14,8 +14,8 @@ a > img {
 }
 
 .waterfall-wrap {
-  position: relative;
   width: 90%;
   min-width: 700px;
   margin: 0 auto;
+  outline: 1px solid #ccc;
 }

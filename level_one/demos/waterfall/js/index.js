@@ -1,181 +1,177 @@
-(function(myPlugin) {
-  var options = null;
-  var vwWidth = 0,
-    vwHeight = 0;
-  var wrapWidth = 0;
-  var colNum = 0; // 大于1
-  var gap = 0;
+((myPlugin) => {
+  // 默认配置
+  const defaultConfig = {
+    container: document.body,
+    data: [],
+    imageWidth: 220,
+    minHGap: 10,
+    vGap: 20,
+  };
+  // 最终配置
+  const finallyConfig = {};
+  // 容器尺寸和每行列数、水平间距
+  const waterfallInfo = {
+    containerWidth: 0,
+    containerHeight: 0,
+    hGap: 0, // 水平间隙
+    vGap: 0, // 垂直间隙
+    columnCount: 0, // 每行列数
+    allImageData: [], // 所有图片数据：dom、width、height、top、left
+    columnHeights: [], // 记录每一列高度
+  };
 
-  var dataSizeArr = [];
-  var columnHeightArr = [];
+  // 函数防抖
+  const debounce = (fn, delay = 200, immediate = false) => {
+    let timer = null;
 
-  function debounce(fn, delay = 200, immediate = false) {
-    var timer = null;
-
-    return function() {
-      var context = this,
-        args = arguments;
-
+    return function (...argsList) {
       timer && clearTimeout(timer);
       if (immediate) {
-        var isImmediateExec = !timer;
-        isImmediateExec && fn.apply(context, args);
-        timer = setTimeout(function() {
+        const isImmediateExec = !timer;
+        isImmediateExec && fn.apply(this, argsList);
+        timer = setTimeout(() => {
           timer = null;
         }, delay);
       } else {
-        timer = setTimeout(function() {
-          fn.apply(context, args);
+        timer = setTimeout(() => {
+          fn.apply(this, argsList);
           timer = null;
         }, delay);
       }
     };
-  }
+  };
 
-  function initContainer() {
-    if(getComputedStyle(options.dom).position === 'static'){
-      options.dom.style.position = 'relative';
+  // 初始化父容器
+  const initContainer = () => {
+    // 检测父容器是否定位
+    const { container } = finallyConfig;
+    if (getComputedStyle(container).position === 'static') {
+      container.style.position = 'relative';
     }
-  }
+  };
+  // 初始化容器尺寸、每行列数、水平间距
+  const initWaterfallInfo = () => {
+    const { container, imageWidth, minHGap, vGap } = finallyConfig;
+    const containerWidth = container.clientWidth;
+    const columnCount = Math.floor(
+      (containerWidth + minHGap) / (imageWidth + minHGap)
+    ); // columnCount*imageWidth + (columnCount -1)*minHGap = containerWidth
+    const hGap =
+      (containerWidth - imageWidth * columnCount) / (columnCount - 1);
+    const columnHeights = new Array(columnCount).fill(0);
 
-  function initVwSize() {
-    vwWidth = document.documentElement.clientWidth || document.body.clientWidth;
-    vwHeight =
-      document.documentElement.clientHeight || document.body.clientHeight;
-    wrapWidth = options.dom.clientWidth;
-    colNum = Math.floor(wrapWidth / options.width);
-    gap = (wrapWidth - colNum * options.width) / (colNum - 1);
-  }
-
-  function setItemPosition(dom, left, top) {
-    dom.style.position = 'absolute';
-    dom.style.left = left + 'px';
-    dom.style.top = top + 'px';
-
-    options.dom.appendChild(dom);
-  }
-
-  function getMinHeightAndIndex() {
-    var minValue = Math.min.apply(null, columnHeightArr);
-    var minIndex = columnHeightArr.findIndex(function(item) {
-      return Math.floor(item) === Math.floor(minValue);
+    Object.assign(waterfallInfo, {
+      containerWidth,
+      columnCount,
+      hGap,
+      vGap,
+      columnHeights,
     });
+  };
+  // 计算每张图片位置，并设置
+  const setImagePosition = (() => {
+    // 获取列中最小高度值和对应的索引
+    const getMinHeightAndIndex = () => {
+      const { columnHeights } = waterfallInfo;
+      const minHeight = Math.min.apply(Math, columnHeights);
+      const index = columnHeights.findIndex((height) => height === minHeight);
 
-    return {
-      value: minValue,
-      index: minIndex,
+      return { minHeight, index };
     };
-  }
 
-  function addItemToWrap(param) {
-    var dataLen = columnHeightArr.length;
-    if (dataLen < colNum) {
-      setItemPosition(param.dom, dataLen * (options.width + gap), 0);
-      columnHeightArr[dataLen] = param.height + options.marginBottom;
-    } else {
-      var minParam = getMinHeightAndIndex();
-      var index = minParam.index;
-      var value = minParam.value;
+    return (imgInfo, callback) => {
+      const { imgDom, imageWidth, imageHeight } = imgInfo;
+      const { hGap, vGap, columnHeights } = waterfallInfo;
+      const { minHeight, index } = getMinHeightAndIndex();
+      const top = minHeight;
+      const left = (imageWidth + hGap) * index;
+      // 更新数据
+      columnHeights[index] += imageHeight + vGap;
+      imgInfo.left = left;
+      imgInfo.top = top;
+      // 更新样式
+      imgDom.style.left = left + 'px';
+      imgDom.style.top = top + 'px';
+      // 更新容器高度
+      callback?.();
+    };
+  })();
+  // 设置容器高度
+  const setContainerHeight = debounce(() => {
+    const { columnHeights, vGap } = waterfallInfo;
+    const { container } = finallyConfig;
 
-      setItemPosition(param.dom, index * (options.width + gap), value);
-      columnHeightArr[index] = value + param.height + options.marginBottom;
-    }
-  }
+    const maxHeight = Math.max.apply(Math, columnHeights) - vGap;
+    waterfallInfo.containerHeight = maxHeight;
+    container.style.height = maxHeight + 'px';
+  });
+  // 初始化所有图片
+  const initAllImageItem = (() => {
+    // 创建一张图片
+    const createImageItem = (() => {
+      // 初始化图片数据
+      const initImageData = function (callback) {
+        const { width, height } = this;
+        const { imageWidth, container } = finallyConfig;
+        const imageHeight = (height / width) * imageWidth; // height / width = imageHeight / imageWidth
+        const imgInfo = {
+          imgDom: this,
+          imageWidth,
+          imageHeight,
+          top: 0,
+          left: 0,
+        };
 
-  function createItem(item, callback) {
-    var imgDom = new Image();
-    imgDom.addEventListener('load', function() {
-      var height = (imgDom.height / imgDom.width) * options.width;
-      var param = {
-        dom: imgDom,
-        height,
+        this.width = imageWidth;
+        this.height = imageHeight;
+        this.style.position = 'absolute';
+        this.style.transition = '0.5s';
+        container.appendChild(this);
+
+        waterfallInfo.allImageData.push(imgInfo);
+
+        callback?.(imgInfo);
       };
-      imgDom.width = options.width;
-      imgDom.height = height;
-      callback(param);
-      dataSizeArr.push(param);
-    });
-    imgDom.src = item;
-  }
 
-  function initItem() {
-    options.data.forEach(function(item) {
-      createItem(item, addItemToWrap);
-    });
-  }
+      return (imgSrc, callback) => {
+        const imgDom = new Image();
+        imgDom.addEventListener('load', initImageData.bind(imgDom, callback));
+        imgDom.src = imgSrc;
+      };
+    })();
 
-  function registerEvents() {
+    return () =>
+      data.forEach((imgSrc) =>
+        createImageItem(imgSrc, (imgInfo) =>
+          setImagePosition(imgInfo, setContainerHeight)
+        )
+      );
+  })();
+  // 注册事件
+  const registerEvents = () => {
     window.addEventListener(
       'resize',
-      debounce(function() {
-        initVwSize();
-        columnHeightArr.length = 0;
-        dataSizeArr.forEach(addItemToWrap);
+      debounce(() => {
+        initWaterfallInfo();
+        waterfallInfo.allImageData.forEach((imgInfo) =>
+          setImagePosition(imgInfo, setContainerHeight)
+        );
       })
     );
-  }
+  };
 
-  function init() {
+  // 初始化
+  const init = () => {
     initContainer();
-    initVwSize();
-    initItem();
+    initWaterfallInfo();
+    initAllImageItem();
     registerEvents();
-  }
+  };
 
-  function waterfall(config) {
-    options = config;
+  const waterfall = (userConfig = {}) => {
+    Object.assign(finallyConfig, defaultConfig, userConfig);
     init();
-  }
+  };
 
   myPlugin.waterfall = waterfall;
 })(window.myPlugin || (window.myPlugin = {}));
-
-myPlugin.waterfall({
-  dom: document.querySelector('.waterfall-wrap'),
-  width: 220,
-  marginBottom: 20,
-  data: [
-    './images/0.jpg',
-    './images/1.jpg',
-    './images/2.jpg',
-    './images/3.jpg',
-    './images/4.jpg',
-    './images/5.jpg',
-    './images/6.jpg',
-    './images/7.jpg',
-    './images/8.jpg',
-    './images/9.jpg',
-    './images/10.jpg',
-    './images/11.jpg',
-    './images/12.jpg',
-    './images/13.jpg',
-    './images/14.jpg',
-    './images/15.jpg',
-    './images/16.jpg',
-    './images/17.jpg',
-    './images/18.jpg',
-    './images/19.jpg',
-    './images/20.jpg',
-    './images/21.jpg',
-    './images/22.jpg',
-    './images/23.jpg',
-    './images/24.jpg',
-    './images/25.jpg',
-    './images/26.jpg',
-    './images/27.jpg',
-    './images/28.jpg',
-    './images/29.jpg',
-    './images/30.jpg',
-    './images/31.jpg',
-    './images/32.jpg',
-    './images/33.jpg',
-    './images/34.jpg',
-    './images/35.jpg',
-    './images/36.jpg',
-    './images/37.jpg',
-    './images/38.jpg',
-    './images/39.jpg',
-    './images/40.jpg',
-  ],
-  callback: function(item, dom) {},
-});

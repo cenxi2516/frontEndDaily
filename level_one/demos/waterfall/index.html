@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>瀑布流</title>
+    <link rel="stylesheet" href="./css/index.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>瀑布流</title>
-  <link rel="stylesheet" href="./css/index.css">
-</head>
-
-<body>
-  <div class="waterfall-wrap"></div>
-  <script src="./js/index.js"></script>
-</body>
-
+  <body>
+    <div class="waterfall-wrap"></div>
+    <script src="./js/index.js"></script>
+    <script>
+      const data = new Array(41).fill(0).map((_, index) => `./images/${index}.jpg`);
+      myPlugin.waterfall({
+        container: document.querySelector('.waterfall-wrap'),
+        data,
+      });
+    </script>
+  </body>
 </html>
