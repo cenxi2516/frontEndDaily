@@ -1,4 +1,4 @@
-(function (myPlugin) {
+(function(myPlugin) {
   var options = null;
   var vwWidth = 0,
     vwHeight = 0;
@@ -12,7 +12,7 @@
   function debounce(fn, delay = 200, immediate = false) {
     var timer = null;
 
-    return function () {
+    return function() {
       var context = this,
         args = arguments;
 
@@ -20,16 +20,22 @@
       if (immediate) {
         var isImmediateExec = !timer;
         isImmediateExec && fn.apply(context, args);
-        timer = setTimeout(function () {
+        timer = setTimeout(function() {
           timer = null;
         }, delay);
       } else {
-        timer = setTimeout(function () {
+        timer = setTimeout(function() {
           fn.apply(context, args);
           timer = null;
         }, delay);
       }
     };
+  }
+
+  function initContainer() {
+    if(getComputedStyle(options.dom).position === 'static'){
+      options.dom.style.position = 'relative';
+    }
   }
 
   function initVwSize() {
@@ -51,7 +57,7 @@
 
   function getMinHeightAndIndex() {
     var minValue = Math.min.apply(null, columnHeightArr);
-    var minIndex = columnHeightArr.findIndex(function (item) {
+    var minIndex = columnHeightArr.findIndex(function(item) {
       return Math.floor(item) === Math.floor(minValue);
     });
 
@@ -78,7 +84,7 @@
 
   function createItem(item, callback) {
     var imgDom = new Image();
-    imgDom.addEventListener('load', function () {
+    imgDom.addEventListener('load', function() {
       var height = (imgDom.height / imgDom.width) * options.width;
       var param = {
         dom: imgDom,
@@ -93,7 +99,7 @@
   }
 
   function initItem() {
-    options.data.forEach(function (item) {
+    options.data.forEach(function(item) {
       createItem(item, addItemToWrap);
     });
   }
@@ -101,7 +107,7 @@
   function registerEvents() {
     window.addEventListener(
       'resize',
-      debounce(function () {
+      debounce(function() {
         initVwSize();
         columnHeightArr.length = 0;
         dataSizeArr.forEach(addItemToWrap);
@@ -110,6 +116,7 @@
   }
 
   function init() {
+    initContainer();
     initVwSize();
     initItem();
     registerEvents();
@@ -170,5 +177,5 @@ myPlugin.waterfall({
     './images/39.jpg',
     './images/40.jpg',
   ],
-  callback: function (item, dom) {},
+  callback: function(item, dom) {},
 });
