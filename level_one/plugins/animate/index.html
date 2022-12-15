@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>动画插件</title>
+  <style>
+    .box {
+      width: 100px;
+      height: 100px;
+      background-color: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box"></div>
+  <p><button id="beginBtn">开始</button></p>
+  <p><button id="stopBtn">暂停</button></p>
+  <script src="./index.js"></script>
+  <script>
+    const boxDom = document.querySelector('.box');
+    const beginBtn = document.getElementById('beginBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const { Animate } = myPlugin;
+    const animate = new Animate({
+      duration: 30, // 每次运动时间间隔，单位毫秒
+      totalTime: 3000, // 运动完成总时间
+      beginValue: {
+        x: 0,
+        y: 0
+      },
+      targetValue: {
+        x: 500,
+        y: 300
+      },
+      // onStart(data) {
+      //   console.log(data);
+      // },
+      onMove(data) {
+        boxDom.style.transform = `translate(${data.x}px, ${data.y}px)`;
+      },
+      onOver(data) {
+        window.alert('运动完成');
+      }
+    });
+
+    beginBtn.addEventListener('click', () => animate.start());
+    stopBtn.addEventListener('click', () => animate.stop());
+
+    console.log(animate);
+  </script>
+</body>
+
+</html>
