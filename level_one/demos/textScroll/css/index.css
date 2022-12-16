@@ -32,7 +32,7 @@ ul {
   overflow-y: hidden;
 }
 
-.container .content li {
+.container .content > .notice-item {
   height: 30px;
   width: 874px;
   white-space: nowrap;

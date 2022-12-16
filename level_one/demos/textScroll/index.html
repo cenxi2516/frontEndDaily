@@ -16,7 +16,30 @@
       <ul class="content"></ul>
     </div>
   </div>
+  <script src="./../../plugins/animate/index.js"></script>
   <script src="./js/index.js"></script>
+  <script>
+    const { NoticeVerticalScroll } = myPlugin;
+    const nvs = new NoticeVerticalScroll({
+      duration: 4000,
+      data: [
+        '1. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dignissimos, repellat?',
+        '2. Eveniet itaque voluptatibus quam animi nulla, odit architecto temporibus vero!',
+        '3. A ipsam dolores minima exercitationem ullam. Consectetur corporis nisi distinctio.',
+        '4. Aliquid quis at laborum? Fuga ab eveniet consequuntur qui deleniti.',
+        '5. Similique sequi sint maxime expedita excepturi in quae iusto eius?',
+      ],
+      container: tools.$('.content'),
+      noticeTag: 'li',
+      noticeClass: 'notice-item',
+      animateConfig: {
+        duration: 16,
+        totalTime: 500
+      }
+    });
+    nvs.init();
+    console.log(nvs);
+  </script>
 </body>
 
 </html>

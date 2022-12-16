@@ -1,139 +1,130 @@
-(function () {
-  // 数据
-  var notices = (function () {
-    return [
-      '1. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dignissimos, repellat?',
-      '2. Eveniet itaque voluptatibus quam animi nulla, odit architecto temporibus vero!',
-      '3. A ipsam dolores minima exercitationem ullam. Consectetur corporis nisi distinctio.',
-      '4. Aliquid quis at laborum? Fuga ab eveniet consequuntur qui deleniti.',
-      '5. Similique sequi sint maxime expedita excepturi in quae iusto eius?',
-    ];
-  })();
+((tools) => {
+  const $ = (selector, element = document) => element.querySelector(selector);
 
-  // 工具
-  var tools = (function () {
-    /**
-     * 根据css选择器获取第一个dom对象
-     * @param {string} selector css选择器
-     * @param {Element} element dom对象
-     * @returns dom对象
-     */
-    var $ = function (selector, element = document) {
-      return element.querySelector(selector);
-    };
+  tools.$ = $;
+})(window.tools || (window.tools = {}));
 
-    return {
-      $,
-    };
-  })();
+((myPlugin) => {
+  // 默认配置
+  const DefaultOptions = {
+    duration: 1000, // 滚动间隔时间
+    data: [],
+    container: document.body,
+    noticeTag: 'div',
+    noticeClass: '',
+    animateConfig: {},
+  };
 
-  // 业务
-  var noticeVerticalScroll = (function () {
-    var contentContainerDom = tools.$('.content');
-    var timer = null;
-    var curIndex = 0;
-    var noticeNum = 0;
-    var noticeContentHeight = 0;
-    var onceChangeHeight = 0;
-    // 在页面生成公告
-    var generateNotices = function () {
-      if (!notices.length) return;
-      var generateOneNotice = function (noticeContent) {
-        return `<li>${noticeContent}</li>`;
-      };
-      notices.push(notices[0]);
-      var noticesHTMLs = notices.reduce(function (noticesHTMLs, notice) {
-        noticesHTMLs.push(generateOneNotice(notice));
-        return noticesHTMLs;
-      }, []);
-      contentContainerDom.innerHTML = noticesHTMLs.join('');
-    };
+  // 将数据添加到页面
+  const addDataToContainer = (() => {
+    const createOneNotice = (content, noticeTag, noticeClass) =>
+      `<${noticeTag} class="${noticeClass}">${content}</${noticeTag}>`;
 
-    // 每间隔duration切换一次公告
-    var autoVerticalScroll = function (duration = 2000) {
-      noticeNum = notices.length;
-      noticeContentHeight = contentContainerDom.offsetHeight;
-      onceChangeHeight = noticeContentHeight / noticeNum;
-      var innerTimer = null;
-      var totalDuration = 500;
-      var onceDuration = 10;
-      var times = totalDuration / onceDuration;
+    return ({ data, container, noticeTag, noticeClass }) => {
+      const allNoticeHTMLArr = data.reduce(
+        (allNoticeHTMLArr, noticeContent) => {
+          allNoticeHTMLArr.push(
+            createOneNotice(noticeContent, noticeTag, noticeClass)
+          );
 
-      var scrollFromTo = function () {
-        curIndex = ++curIndex % noticeNum;
-        var startPos = (curIndex - 1) * onceChangeHeight;
-        var endPos = curIndex * onceChangeHeight;
-        var curPos = startPos;
-        var stepLen = (endPos - startPos) / times;
+          return allNoticeHTMLArr;
+        },
+        []
+      );
 
-        innerTimer && clearInterval(innerTimer);
-        innerTimer = setInterval(function () {
-          curPos += stepLen;
-          if (curPos >= endPos) {
-            curPos = endPos;
-            clearInterval(innerTimer);
-            innerTimer = null;
-            if (curIndex === noticeNum - 1) {
-              curPos = 0;
-              curIndex = 0;
-            }
-          }
-          contentContainerDom.style.transform = `translateY(-${curPos}px)`;
-        }, onceDuration);
-      };
-
-      return function () {
-        timer && clearInterval(timer);
-        timer = setInterval(scrollFromTo, duration);
-      };
-    };
-
-    // 开始自动播放公告
-    var start = function () {
-      autoVerticalScroll()();
-    };
-
-    // 暂停自动播放公告
-    var stop = function () {
-      clearInterval(timer);
-      timer = null;
-    };
-
-    // 初始化
-    var init = function () {
-      generateNotices();
-    };
-
-    return {
-      init,
-      start,
-      stop,
+      container.innerHTML = allNoticeHTMLArr.join('');
     };
   })();
+  // 将noticeItem高度加入数组
+  const initNoticeData = (noticeHeightData, container) => {
+    const allNoticeItems = [...container.children];
+    allNoticeItems.forEach((noticeItemDom) => {
+      noticeHeightData.push(noticeItemDom.offsetHeight);
+    });
+  };
+
+  // 数组求和
+  const sum = (arr) => arr.reduce((result, curValue) => result + curValue, 0);
+
+  // 垂直移动
+  const verticalMove = (container, y) =>
+    (container.style.transform = `translateY(${y}px)`);
 
   // 注册事件
-  var registerEvents = function () {
-    // 当页面加载完
-    window.addEventListener('load', function () {
-      noticeVerticalScroll.start();
-    });
-
-    // Tab显示或隐藏切换
+  const registerEvents = (that) => {
     document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'visible') {
-        // Tab 显示
-        noticeVerticalScroll.start();
+      if (this.visibilityState === 'visible') {
+        // Tab显示
+        that.start();
       } else {
-        // Tab 隐藏
-        noticeVerticalScroll.stop();
+        // Tab隐藏
+        that.stop();
       }
     });
+    window.addEventListener('load', () => that.start());
   };
 
-  // 初始化
-  var init = function () {
-    noticeVerticalScroll.init();
-    registerEvents();
-  };
-  init();
-})();
+  // 动画插件
+  const { Animate } = myPlugin;
+
+  class NoticeVerticalScroll {
+    constructor(options = {}) {
+      this.options = { ...DefaultOptions, ...options };
+      this.timer = null; // 滚动时间间隔
+
+      const { data } = this.options;
+      this.count = data.length; // notice数量
+      this.curIndex = 0; // 当前索引
+      this.newData = [...data, data[0]]; // 将第一条数据拷贝添加到末尾
+      this.noticeHeightData = [];
+    }
+
+    start() {
+      if (this.timer) return;
+
+      const { duration, animateConfig } = this.options;
+
+      this.timer = setInterval(() => {
+        this.curIndex = ++this.curIndex % (this.count + 1);
+        const animate = new Animate({
+          ...animateConfig,
+          beginValue: {
+            y:
+              this.curIndex - 1
+                ? sum(this.noticeHeightData.slice(0, this.curIndex - 1))
+                : 0,
+          },
+          targetValue: {
+            y: sum(this.noticeHeightData.slice(0, this.curIndex)),
+          },
+          onMove: ({ y }) => {
+            verticalMove(this.options.container, -y);
+          },
+          onOver: () => {
+            if (this.curIndex === this.count) {
+              this.curIndex = 0;
+              verticalMove(this.options.container, 0);
+            }
+          },
+        });
+        animate.start();
+      }, duration);
+    }
+
+    stop() {
+      if (!this.timer) return;
+
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+
+    // 初始化
+    init() {
+      addDataToContainer({ ...this.options, data: this.newData });
+      initNoticeData(this.noticeHeightData, this.options.container);
+      registerEvents(this);
+    }
+  }
+
+  myPlugin.NoticeVerticalScroll = NoticeVerticalScroll;
+})(window.myPlugin || (window.myPlugin = {}));
