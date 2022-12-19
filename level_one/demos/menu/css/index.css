@@ -1,0 +1,62 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: normal;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+.container {
+  width: 300px;
+  margin: 100px auto;
+}
+
+.menu-wrap > .menu-item {
+  padding-bottom: 10px;
+}
+
+.menu-wrap > .menu-item.active > .menu-item-content {
+  height: auto;
+}
+
+.menu-wrap > .menu-item > .title {
+  padding: 5px 6px 4px;
+  font-size: 16px;
+  color: #666;
+  border: 1px solid #e0e0e0;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.menu-wrap > .menu-item > .menu-item-content {
+  padding-left: 20px;
+  overflow: hidden;
+  height: 0;
+}
+
+.menu-wrap > .menu-item > .menu-item-content > li {
+  padding-right: 20px;
+  font-size: 14px;
+  height: 30px;
+  line-height: 30px;
+  color: #00f;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
