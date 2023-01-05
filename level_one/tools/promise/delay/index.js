@@ -4,8 +4,4 @@
  * @returns Promise对象
  */
 const delay = (duration) =>
-  new Promise((resolve, _) => {
-    setTimeout(() => {
-      resolve();
-    }, duration);
-  });
+  new Promise((resolve) => setTimeout(resolve, duration));
